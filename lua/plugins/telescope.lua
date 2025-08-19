@@ -40,8 +40,8 @@ return {
       { "<leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "Recent" },
       { "<leader>fR", "<cmd>Telescope oldfiles cwd_only=true<cr>", desc = "Recent (cwd)" },
       -- git
-      { "<leader>gc", "<cmd>Telescope git_commits<CR>", desc = "commits" },
-      { "<leader>gs", "<cmd>Telescope git_status<CR>", desc = "status" },
+      { "<leader>gC", "<cmd>Telescope git_commits<CR>", desc = "Git Commits (Telescope)" },
+      { "<leader>gS", "<cmd>Telescope git_status<CR>", desc = "Git Status (Telescope)" },
       -- search
       { '<leader>s"', "<cmd>Telescope registers<cr>", desc = "Registers" },
       { "<leader>sa", "<cmd>Telescope autocommands<cr>", desc = "Auto Commands" },

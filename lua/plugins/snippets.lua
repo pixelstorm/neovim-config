@@ -171,7 +171,19 @@ return {
       for _, source in ipairs(opts.sources) do
         source.group_index = source.group_index or 1
       end
-      require("cmp").setup(opts)
+      
+      local cmp = require("cmp")
+      cmp.setup(opts)
+      
+      -- Workaround for Neovim 0.10+ LSP client compatibility issue
+      -- Disable LSP completion for problematic filetypes until plugins are updated
+      cmp.setup.filetype({ 'scss', 'css' }, {
+        sources = cmp.config.sources({
+          { name = "luasnip" },
+          { name = "path" },
+          { name = "buffer" },
+        })
+      })
     end,
   },
 }

@@ -14,14 +14,89 @@ return {
       "sindrets/diffview.nvim",        -- optional - Diff integration
       "nvim-telescope/telescope.nvim", -- optional
     },
+    event = "VeryLazy",
     config = true,
     keys = {
-      { "<leader>gg", "<cmd>Neogit<cr>", desc = "Neogit" },
-      { "<leader>gc", "<cmd>Neogit commit<cr>", desc = "Git Commit" },
-      { "<leader>gp", "<cmd>Neogit push<cr>", desc = "Git Push" },
-      { "<leader>gl", "<cmd>Neogit pull<cr>", desc = "Git Pull" },
-      { "<leader>gs", "<cmd>Neogit kind=split<cr>", desc = "Git Status (Split)" },
-      { "<leader>gt", "<cmd>Neogit kind=tab<cr>", desc = "Git Status (Tab)" },
+      {
+        "<leader>gg",
+        function()
+          -- Find git repository relative to current buffer
+          local current_file = vim.fn.expand('%:p')
+          local git_dir = vim.fn.finddir('.git', current_file .. ';')
+          if git_dir ~= '' then
+            -- Change to the git repository root
+            local git_root = vim.fn.fnamemodify(git_dir, ':h')
+            vim.cmd('cd ' .. git_root)
+          end
+          require("neogit").open()
+        end,
+        desc = "Neogit Status"
+      },
+      {
+        "<leader>gc",
+        function()
+          local current_file = vim.fn.expand('%:p')
+          local git_dir = vim.fn.finddir('.git', current_file .. ';')
+          if git_dir ~= '' then
+            local git_root = vim.fn.fnamemodify(git_dir, ':h')
+            vim.cmd('cd ' .. git_root)
+          end
+          require("neogit").open({ "commit" })
+        end,
+        desc = "Neogit Commit"
+      },
+      {
+        "<leader>gp",
+        function()
+          local current_file = vim.fn.expand('%:p')
+          local git_dir = vim.fn.finddir('.git', current_file .. ';')
+          if git_dir ~= '' then
+            local git_root = vim.fn.fnamemodify(git_dir, ':h')
+            vim.cmd('cd ' .. git_root)
+          end
+          require("neogit").open({ "push" })
+        end,
+        desc = "Neogit Push"
+      },
+      {
+        "<leader>gl",
+        function()
+          local current_file = vim.fn.expand('%:p')
+          local git_dir = vim.fn.finddir('.git', current_file .. ';')
+          if git_dir ~= '' then
+            local git_root = vim.fn.fnamemodify(git_dir, ':h')
+            vim.cmd('cd ' .. git_root)
+          end
+          require("neogit").open({ "pull" })
+        end,
+        desc = "Neogit Pull"
+      },
+      {
+        "<leader>gs",
+        function()
+          local current_file = vim.fn.expand('%:p')
+          local git_dir = vim.fn.finddir('.git', current_file .. ';')
+          if git_dir ~= '' then
+            local git_root = vim.fn.fnamemodify(git_dir, ':h')
+            vim.cmd('cd ' .. git_root)
+          end
+          require("neogit").open({ kind = "split" })
+        end,
+        desc = "Neogit Status (Split)"
+      },
+      {
+        "<leader>gt",
+        function()
+          local current_file = vim.fn.expand('%:p')
+          local git_dir = vim.fn.finddir('.git', current_file .. ';')
+          if git_dir ~= '' then
+            local git_root = vim.fn.fnamemodify(git_dir, ':h')
+            vim.cmd('cd ' .. git_root)
+          end
+          require("neogit").open({ kind = "tab" })
+        end,
+        desc = "Neogit Status (Tab)"
+      },
     },
     opts = {
       -- Hides the hints at the top of the status buffer
