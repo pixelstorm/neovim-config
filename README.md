@@ -186,6 +186,17 @@ Make sure you have the following installed:
 | `<leader>wq` | Save and quit | Write and quit     |
 | `<leader>ww` | Save file     | Write current file |
 
+### Tabs
+
+| Key                  | Action       | Description        |
+| -------------------- | ------------ | ------------------ |
+| `<leader><tab>l`     | Last tab     | Go to last tab     |
+| `<leader><tab>f`     | First tab    | Go to first tab    |
+| `<leader><tab><tab>` | New tab      | Create new tab     |
+| `<leader><tab>]`     | Next tab     | Go to next tab     |
+| `<leader><tab>d`     | Close tab    | Close current tab  |
+| `<leader><tab>[`     | Previous tab | Go to previous tab |
+
 ## 🔧 Configuration Structure
 
 ```
