@@ -12,7 +12,7 @@ return {
     version = false, -- last release is way too old and doesn't work on Windows
     build = ":TSUpdate",
     event = { "VeryLazy" },
-    enabled = false, -- TEMPORARILY DISABLED due to query compatibility issues
+    enabled = true, -- Re-enabled with Twig support
     init = function(plugin)
       -- PERF: add nvim-treesitter queries to the rtp and it's custom query predicates early
       -- This is needed because a bunch of plugins no longer `require("nvim-treesitter")`, which
@@ -58,13 +58,22 @@ return {
       highlight = {
         enable = true,
         additional_vim_regex_highlighting = false,
-        -- Disable highlighting for problematic languages and large files
+        -- Disable highlighting for problematic contexts and large files
         disable = function(lang, buf)
-          -- Disable for languages with query compatibility issues
+          -- Check if this is a preview context (fzf, telescope, etc.)
+          local bufname = vim.api.nvim_buf_get_name(buf)
+          local is_preview = bufname:match("fzf") or
+                           bufname:match("telescope") or
+                           bufname:match("preview") or
+                           vim.bo[buf].buftype == "nofile"
+          
+          -- Disable PHP highlighting in preview contexts to prevent "relative_name" errors
+          if is_preview and (lang == "php" or lang == "phpdoc") then
+            return true
+          end
+          
+          -- Disable for other problematic languages
           local problematic_langs = {
-            "php",
-            "phpdoc",
-            "twig",
             "blade",
             "smarty"
           }
@@ -76,7 +85,7 @@ return {
           end
           
           local max_filesize = 100 * 1024 -- 100 KB
-          local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+          local ok, stats = pcall(vim.loop.fs_stat, bufname)
           if ok and stats and stats.size > max_filesize then
             return true
           end
@@ -102,7 +111,8 @@ return {
         "luap",
         "markdown",
         "markdown_inline",
-        -- "php" and "phpdoc" removed due to query compatibility issues
+        "php", -- Re-enabled
+        "phpdoc", -- Re-enabled
         "python",
         "query",
         "regex",
@@ -113,7 +123,7 @@ return {
         "vim",
         "vimdoc",
         "yaml",
-        -- Note: "twig" parser also removed due to query compatibility issues
+        "twig", -- Re-enabled for .html.twig support
       },
       incremental_selection = {
         enable = true,
@@ -151,11 +161,11 @@ return {
       local ok, err = pcall(require("nvim-treesitter.configs").setup, opts)
       if not ok then
         vim.notify("Treesitter setup failed: " .. tostring(err), vim.log.levels.WARN)
-        -- Fallback to basic configuration
+        -- Fallback to basic configuration with PHP disabled
         require("nvim-treesitter.configs").setup({
           highlight = {
             enable = true,
-            disable = { "php", "phpdoc", "twig", "blade", "smarty" }
+            disable = { "php", "phpdoc", "blade", "smarty" }
           },
           indent = { enable = true },
         })
@@ -163,7 +173,7 @@ return {
       
       -- Additional safety: disable any existing problematic parsers
       vim.schedule(function()
-        local problematic_parsers = { "php", "phpdoc", "twig", "blade", "smarty" }
+        local problematic_parsers = { "blade", "smarty" }
         for _, parser in ipairs(problematic_parsers) do
           pcall(function()
             vim.treesitter.language.require_language(parser, nil, true)

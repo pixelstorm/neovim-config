@@ -1,0 +1,20 @@
+/* Test theme file */
+body {
+    background-color: #ffffff;
+    color: #333333;
+    font-family: Arial, sans-serif;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.header {
+    background: linear-gradient(to right, #007bff, #0056b3);
+    color: white;
+    padding: 1rem;
+}
+
+/* Test completion in this file */

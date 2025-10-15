@@ -35,14 +35,7 @@ return {
       delete_check_events = "TextChanged",
     },
     keys = {
-      {
-        "<tab>",
-        function()
-          return require("luasnip").jumpable(1) and "<Plug>luasnip-jump-next" or "<tab>"
-        end,
-        expr = true, silent = true, mode = "i",
-      },
-      { "<tab>", function() require("luasnip").jump(1) end, mode = "s" },
+      -- Remove conflicting Tab mapping - handled by nvim-cmp now
       { "<s-tab>", function() require("luasnip").jump(-1) end, mode = { "i", "s" } },
     },
     config = function(_, opts)
@@ -168,22 +161,9 @@ return {
       }
     end,
     config = function(_, opts)
-      for _, source in ipairs(opts.sources) do
-        source.group_index = source.group_index or 1
-      end
-      
-      local cmp = require("cmp")
-      cmp.setup(opts)
-      
-      -- Workaround for Neovim 0.10+ LSP client compatibility issue
-      -- Disable LSP completion for problematic filetypes until plugins are updated
-      cmp.setup.filetype({ 'scss', 'css' }, {
-        sources = cmp.config.sources({
-          { name = "luasnip" },
-          { name = "path" },
-          { name = "buffer" },
-        })
-      })
+      -- This plugin configuration is disabled to prevent conflicts
+      -- All nvim-cmp configuration is handled in cmp.lua
+      vim.notify("[SNIPPETS DEBUG] Skipping duplicate nvim-cmp setup to prevent conflicts", vim.log.levels.INFO)
     end,
   },
 }

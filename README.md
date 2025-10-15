@@ -60,6 +60,7 @@ A comprehensive, modern Neovim configuration designed for web development with P
 - **Indent guides** and scope visualization
 - **Auto-formatting** on save
 - **Persistence** for automatic session management
+- **Colorizer** for real-time color swatch previews in CSS, SCSS, HTML, and JavaScript files
 
 ## 📦 Installation
 
@@ -121,6 +122,61 @@ Make sure you have the following installed:
 | `<leader>ff` | Find files            | Telescope file finder    |
 | `<leader>fg` | Git files             | Find Git files           |
 | `<leader>fr` | Recent files          | Recently opened files    |
+
+### File Creation & Management
+
+| Key          | Action               | Description                                          |
+| ------------ | -------------------- | ---------------------------------------------------- |
+| `<leader>fn` | New file             | Create new file (saves to current working directory) |
+| `<leader>vn` | New vertical split   | Create new file in vertical split                    |
+| `<leader>vh` | New horizontal split | Create new file in horizontal split                  |
+| `<leader>vf` | Find file in h-split | Find/create file in horizontal split                 |
+| `<leader>vF` | Find file in v-split | Find/create file in vertical split                   |
+
+### Window & Buffer Management
+
+| Key          | Action              | Description                              |
+| ------------ | ------------------- | ---------------------------------------- |
+| `<leader>bd` | Delete buffer       | Delete current buffer (with save prompt) |
+| `<leader>bD` | Force delete buffer | Force delete buffer (no save prompt)     |
+| `<leader>vq` | Close window        | Close current window                     |
+| `<leader>vc` | Close window        | Close current window (alternative)       |
+| `<leader>vo` | Close other windows | Close all windows except current         |
+| `<leader>vx` | Exchange windows    | Exchange current window with next        |
+| `<leader>vr` | Rotate windows      | Rotate windows clockwise                 |
+| `<leader>vR` | Rotate windows      | Rotate windows counter-clockwise         |
+| `<leader>v=` | Equalize windows    | Make all windows equal size              |
+| `<leader>qq` | Quit all            | Quit Neovim (all buffers)                |
+
+### Window Layouts & Splits
+
+| Key          | Action           | Description                 |
+| ------------ | ---------------- | --------------------------- |
+| `<leader>vs` | Horizontal split | Split window horizontally   |
+| `<leader>vv` | Vertical split   | Split window vertically     |
+| `<leader>-`  | Split below      | Split window below          |
+| `<leader>\|` | Split right      | Split window right          |
+| `<leader>v2` | 2-column layout  | Create 2-column layout      |
+| `<leader>v3` | 3-column layout  | Create 3-column layout      |
+| `<leader>v4` | 4-window grid    | Create 4-window grid layout |
+
+### Window Resizing
+
+| Key          | Action          | Description                 |
+| ------------ | --------------- | --------------------------- |
+| `<leader>v+` | Increase height | Increase window height by 5 |
+| `<leader>v-` | Decrease height | Decrease window height by 5 |
+| `<leader>v>` | Increase width  | Increase window width by 5  |
+| `<leader>v<` | Decrease width  | Decrease window width by 5  |
+
+### Window Movement
+
+| Key          | Action            | Description              |
+| ------------ | ----------------- | ------------------------ |
+| `<leader>vH` | Move window left  | Move window to far left  |
+| `<leader>vJ` | Move window down  | Move window to far down  |
+| `<leader>vK` | Move window up    | Move window to far up    |
+| `<leader>vL` | Move window right | Move window to far right |
 
 ### Search
 
@@ -197,10 +253,17 @@ Make sure you have the following installed:
 | `<leader><tab>d`     | Close tab    | Close current tab  |
 | `<leader><tab>[`     | Previous tab | Go to previous tab |
 
+### UI & Visual
+
+| Key          | Action           | Description                    |
+| ------------ | ---------------- | ------------------------------ |
+| `<leader>uc` | Toggle colorizer | Toggle color swatches (buffer) |
+| `<leader>uC` | Attach colorizer | Attach colorizer to buffer     |
+
 ## 🔧 Configuration Structure
 
 ```
-nvim_2025/
+nvim/
 ├── init.lua                 # Main entry point
 ├── lua/
 │   ├── config/             # Core configuration
@@ -210,6 +273,7 @@ nvim_2025/
 │   │   └── options.lua     # Neovim options
 │   └── plugins/            # Plugin configurations
 │       ├── alpha.lua       # Dashboard
+│       ├── colorizer.lua   # Color swatch previews
 │       ├── colorscheme.lua # Tokyo Night theme
 │       ├── copilot.lua     # GitHub Copilot
 │       ├── editor.lua      # Editor enhancements
@@ -280,6 +344,22 @@ servers = {
 1. **Install Copilot**: Run `:Copilot auth` to authenticate with GitHub
 2. **Check Health**: Run `:checkhealth` to ensure everything is working
 3. **Update Plugins**: Run `:Lazy update` to get the latest versions
+4. **Test Colorizer**: Open a CSS file to see color swatches automatically appear
+
+### Color Swatch Features
+
+1. **Automatic Detection**: Color swatches appear automatically in CSS, SCSS, HTML, and JavaScript files
+2. **Supported Formats**:
+   - Hex colors: `#ff0000`, `#f00`, `#ff000080`
+   - RGB/RGBA: `rgb(255, 0, 0)`, `rgba(255, 0, 0, 0.5)`
+   - HSL/HSLA: `hsl(0, 100%, 50%)`, `hsla(0, 100%, 50%, 0.5)`
+   - Named colors: `red`, `blue`, `transparent`
+   - CSS variables: `var(--primary-color)`
+3. **Toggle Control**: Use `<leader>uc` to toggle colorizer on/off per buffer
+4. **Commands Available**:
+   - `:ColorizerEnable` - Enable for current buffer
+   - `:ColorizerDisable` - Disable for current buffer
+   - `:ColorizerReload` - Reload all buffers
 
 ### Workflow Tips
 
@@ -288,6 +368,66 @@ servers = {
 3. **Search Everything**: Use `<leader>ff` for files, `<leader>/` for text
 4. **Git Workflow**: Use `<leader>gg` for a full Git interface
 5. **Code Navigation**: Use `gd`, `gr`, and `K` for LSP features
+
+### File Creation & Management Workflow
+
+1. **Creating New Files**:
+
+   - Use `<leader>fn` to create a new file in the current working directory
+   - Use `<leader>vn` or `<leader>vh` to create files in splits for side-by-side editing
+   - Files are saved to the current working directory (check with `:pwd`)
+
+2. **File Management**:
+
+   - Save new files with `<leader>w` or `<C-s>` (will prompt for filename)
+   - Use `<leader>wq` to save and quit, or `<leader>qq` to quit all
+   - Close windows with `<leader>vq` or `<leader>vc`
+
+3. **Buffer Deletion (File Removal)**:
+
+   - Use `<leader>bd` to delete current buffer (prompts to save if modified)
+   - Use `<leader>bD` to force delete buffer without saving
+   - **Note**: These commands remove the file from Neovim's memory, not from disk
+   - To delete files from disk, use Neo-tree (`<leader>e`) and right-click → delete
+
+4. **Neo-tree File Management**:
+
+   - Use `<leader>e` to toggle Neo-tree file explorer
+   - Use `<leader>E` to open Neo-tree in floating window
+   - **File Operations in Neo-tree:**
+     - `a` - Create new file/directory (end with `/` for directory)
+     - `d` - Delete file/directory
+     - `r` - Rename file/directory
+     - `c` - Copy file/directory
+     - `x` - Cut file/directory
+     - `p` - Paste file/directory
+     - `y` - Copy file/directory name to clipboard
+     - `Y` - Copy file/directory path to clipboard
+   - **Navigation:**
+     - `Enter` or `o` - Open file/expand directory
+     - `<C-s>` - Open file in horizontal split
+     - `<C-v>` - Open file in vertical split
+     - `<C-t>` - Open file in new tab
+     - `P` - Preview file (toggle)
+     - `l` - Open file/expand directory
+     - `h` - Close directory/go to parent
+     - `.` - Toggle hidden files
+     - `/` - Search in current directory
+     - `f` - Filter files
+     - `F` - Clear filter
+     - `R` - Refresh tree
+     - `?` - Show help
+
+5. **Window Management**:
+
+   - Create layouts quickly with `<leader>v2`, `<leader>v3`, or `<leader>v4`
+   - Use `<leader>vo` to focus on one file (close all other windows)
+   - Resize windows with `<leader>v+/-/>/<` for precise control
+
+6. **Working Directory**:
+   - Files created with `<leader>fn` save to the current working directory
+   - Check current directory with `:pwd`
+   - Change directory with `:cd /path/to/directory` if needed
 
 ### Troubleshooting
 
@@ -329,6 +469,42 @@ Follow the prompts to authenticate with your GitHub account that has Copilot acc
 :Lazy update      # Update all plugins
 ```
 
+#### Neo-tree Issues
+
+**Neo-tree not opening with `<leader>e`:**
+
+1. **Check if Neo-tree is installed:**
+
+   ```vim
+   :Lazy
+   ```
+
+   Look for "neo-tree.nvim" in the plugin list
+
+2. **Force install Neo-tree:**
+
+   ```vim
+   :Lazy sync
+   ```
+
+3. **Test the command directly:**
+
+   ```vim
+   :Neotree toggle
+   ```
+
+4. **Check dependencies:**
+   Ensure these plugins are installed:
+
+   - `plenary.nvim`
+   - `nvim-web-devicons`
+   - `nui.nvim`
+
+5. **Force load the plugin:**
+   ```vim
+   :Lazy load neo-tree.nvim
+   ```
+
 #### Treesitter Errors
 
 If you encounter Treesitter query errors:
@@ -348,6 +524,7 @@ If you encounter Treesitter query errors:
 - **Persistence Module Error**: **RESOLVED** - Added persistence.nvim plugin for session management
 - **Mason-lspconfig Enable Error**: **RESOLVED** - Rewrote LSP setup to avoid automatic_enable compatibility issues
 - **TSServer Deprecation**: **RESOLVED** - Updated from deprecated `tsserver` to `ts_ls`
+- **Neo-tree Not Working**: **RESOLVED** - Fixed plugin installation issue with `:Lazy sync`
 - **Copilot Authentication Error**: **USER ACTION REQUIRED** - Run `:Copilot auth` to authenticate with GitHub
 - **PHP File Errors**: All file types now work without errors after disabling Treesitter
 - **Indent-blankline Error**: Replaced with mini.indentscope for better compatibility

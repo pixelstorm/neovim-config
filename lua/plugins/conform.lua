@@ -33,8 +33,9 @@ return {
       json = { "prettierd", "prettier", stop_after_first = true },
       yaml = { "prettierd", "prettier", stop_after_first = true },
       markdown = { "prettierd", "prettier", stop_after_first = true },
-      php = { "php_cs_fixer" },
-      twig = { "prettierd", "prettier", stop_after_first = true },
+      -- php = { "php_cs_fixer" }, -- DISABLED: PHP formatting removed
+      twig = { "twig_indent" },
+      ["html.twig"] = { "twig_indent" },
     },
     format_on_save = function(bufnr)
       -- Disable with a global or buffer-local variable
@@ -52,6 +53,17 @@ return {
           "$FILENAME",
         },
         stdin = false,
+      },
+      -- Simplified Twig formatter that avoids complex processing
+      twig_indent = {
+        command = "cat", -- Just pass through content unchanged for now
+        args = {},
+        stdin = true,
+        -- Add logging to debug formatter execution
+        prepend_args = function(self, ctx)
+          vim.notify("DEBUG: twig_indent formatter called for " .. ctx.filename, vim.log.levels.INFO)
+          return {}
+        end,
       },
     },
   },

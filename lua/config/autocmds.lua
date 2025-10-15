@@ -112,13 +112,54 @@ vim.api.nvim_create_autocmd({ "FileType" }, {
   end,
 })
 
--- Auto-format on save for specific filetypes
+-- Auto-format on save for specific filetypes (PHP excluded)
 vim.api.nvim_create_autocmd("BufWritePre", {
   group = augroup("auto_format"),
-  pattern = { "*.lua", "*.js", "*.ts", "*.jsx", "*.tsx", "*.php", "*.css", "*.scss", "*.html", "*.twig" },
-  callback = function()
+  pattern = { "*.lua", "*.js", "*.ts", "*.jsx", "*.tsx", "*.css", "*.scss", "*.html", "*.twig" },
+  callback = function(event)
     if vim.g.autoformat then
-      require("conform").format({ async = false, lsp_fallback = true })
+      local filetype = vim.bo[event.buf].filetype
+      
+      -- Skip formatting for PHP files entirely
+      if filetype == "php" then
+        return
+      end
+      
+      -- Add diagnostic logging for Twig files
+      if filetype == "twig" then
+        vim.notify("DEBUG: Formatting Twig file: " .. event.match, vim.log.levels.INFO)
+        
+        -- Check LSP clients attached to this buffer
+        local clients = vim.lsp.get_active_clients({ bufnr = event.buf })
+        for _, client in ipairs(clients) do
+          vim.notify("DEBUG: LSP client attached: " .. client.name, vim.log.levels.INFO)
+        end
+        
+        -- Temporarily disable LSP for Twig files during formatting to prevent sync issues
+        local lsp_clients = vim.lsp.get_active_clients({ bufnr = event.buf })
+        for _, client in ipairs(lsp_clients) do
+          vim.lsp.buf_detach_client(event.buf, client.id)
+        end
+        
+        -- Format the file
+        local ok, err = pcall(function()
+          require("conform").format({ async = false, lsp_fallback = false })
+        end)
+        
+        if not ok then
+          vim.notify("DEBUG: Conform formatting failed: " .. tostring(err), vim.log.levels.ERROR)
+        end
+        
+        -- Re-attach LSP clients after formatting
+        vim.schedule(function()
+          for _, client in ipairs(lsp_clients) do
+            vim.lsp.buf_attach_client(event.buf, client.id)
+          end
+        end)
+      else
+        -- Normal formatting for non-Twig files
+        require("conform").format({ async = false, lsp_fallback = true })
+      end
     end
   end,
 })
@@ -136,10 +177,19 @@ vim.api.nvim_create_autocmd("User", {
   end,
 })
 
--- Additional safety for PHP files and problematic parsers
+-- Twig filetype detection for .html.twig files
+vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+  group = augroup("twig_filetype"),
+  pattern = "*.html.twig",
+  callback = function()
+    vim.bo.filetype = "twig"
+  end,
+})
+
+-- Additional safety for PHP files and problematic parsers (excluding twig)
 vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
   group = augroup("disable_problematic_treesitter"),
-  pattern = {"*.php", "*.twig", "*.blade.php"},
+  pattern = {"*.php", "*.blade.php"},
   callback = function()
     -- Disable Treesitter highlighting for these file types
     vim.treesitter.stop()

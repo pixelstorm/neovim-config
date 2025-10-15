@@ -81,6 +81,10 @@ keymap("n", "<leader>l", "<cmd>Lazy<cr>", { desc = "Lazy" })
 -- New file
 keymap("n", "<leader>fn", "<cmd>enew<cr>", { desc = "New File" })
 
+-- File explorer (Neo-tree)
+keymap("n", "<leader>e", "<cmd>Neotree toggle<cr>", { desc = "Explorer NeoTree (root dir)" })
+keymap("n", "<leader>E", "<cmd>Neotree toggle float<cr>", { desc = "Explorer NeoTree (float)" })
+
 -- Location and quickfix lists
 keymap("n", "<leader>xl", "<cmd>lopen<cr>", { desc = "Location List" })
 keymap("n", "<leader>xq", "<cmd>copen<cr>", { desc = "Quickfix List" })
@@ -114,9 +118,98 @@ keymap("n", "<leader>wa", "<cmd>wa<cr>", { desc = "Save all files" })
 keymap("n", "<leader>wq", "<cmd>wq<cr>", { desc = "Save and quit" })
 keymap("n", "<leader>ww", "<cmd>w<cr>", { desc = "Save file" })
 
--- Window commands moved to different keys
+-- Window/Split Management
 keymap("n", "<leader>-", "<C-W>s", { desc = "Split window below", remap = true })
 keymap("n", "<leader>|", "<C-W>v", { desc = "Split window right", remap = true })
+
+-- Advanced window/split commands
+keymap("n", "<leader>vs", "<C-W>s", { desc = "Split window horizontally" })
+keymap("n", "<leader>vv", "<C-W>v", { desc = "Split window vertically" })
+keymap("n", "<leader>vn", "<cmd>vnew<cr>", { desc = "New vertical split" })
+keymap("n", "<leader>vh", "<cmd>new<cr>", { desc = "New horizontal split" })
+keymap("n", "<leader>vo", "<C-W>o", { desc = "Close all other windows" })
+keymap("n", "<leader>vq", "<C-W>q", { desc = "Close current window" })
+keymap("n", "<leader>vc", "<C-W>c", { desc = "Close current window" })
+keymap("n", "<leader>vx", "<C-W>x", { desc = "Exchange windows" })
+keymap("n", "<leader>vr", "<C-W>r", { desc = "Rotate windows" })
+keymap("n", "<leader>vR", "<C-W>R", { desc = "Rotate windows reverse" })
+
+-- Window movement
+keymap("n", "<leader>vH", "<C-W>H", { desc = "Move window far left" })
+keymap("n", "<leader>vJ", "<C-W>J", { desc = "Move window far down" })
+keymap("n", "<leader>vK", "<C-W>K", { desc = "Move window far up" })
+keymap("n", "<leader>vL", "<C-W>L", { desc = "Move window far right" })
+
+-- Window resizing (enhanced)
+keymap("n", "<leader>v=", "<C-W>=", { desc = "Equalize window sizes" })
+keymap("n", "<leader>v+", "<cmd>resize +5<cr>", { desc = "Increase height" })
+keymap("n", "<leader>v-", "<cmd>resize -5<cr>", { desc = "Decrease height" })
+keymap("n", "<leader>v>", "<cmd>vertical resize +5<cr>", { desc = "Increase width" })
+keymap("n", "<leader>v<", "<cmd>vertical resize -5<cr>", { desc = "Decrease width" })
+
+-- Buffer management in splits
+keymap("n", "<leader>vb", function()
+  vim.ui.select(
+    vim.tbl_map(function(buf)
+      return vim.fn.bufname(buf) ~= "" and vim.fn.bufname(buf) or "[No Name]"
+    end, vim.api.nvim_list_bufs()),
+    { prompt = "Select buffer to open in new split:" },
+    function(choice)
+      if choice then
+        vim.cmd("split")
+        vim.cmd("buffer " .. choice)
+      end
+    end
+  )
+end, { desc = "Open buffer in horizontal split" })
+
+keymap("n", "<leader>vB", function()
+  vim.ui.select(
+    vim.tbl_map(function(buf)
+      return vim.fn.bufname(buf) ~= "" and vim.fn.bufname(buf) or "[No Name]"
+    end, vim.api.nvim_list_bufs()),
+    { prompt = "Select buffer to open in new vertical split:" },
+    function(choice)
+      if choice then
+        vim.cmd("vsplit")
+        vim.cmd("buffer " .. choice)
+      end
+    end
+  )
+end, { desc = "Open buffer in vertical split" })
+
+-- Quick split with file picker
+keymap("n", "<leader>vf", function()
+  vim.cmd("split")
+  require("telescope.builtin").find_files()
+end, { desc = "Find file in horizontal split" })
+
+keymap("n", "<leader>vF", function()
+  vim.cmd("vsplit")
+  require("telescope.builtin").find_files()
+end, { desc = "Find file in vertical split" })
+
+-- Multi-window layouts
+keymap("n", "<leader>v2", function()
+  vim.cmd("only")
+  vim.cmd("vsplit")
+end, { desc = "2-column layout" })
+
+keymap("n", "<leader>v3", function()
+  vim.cmd("only")
+  vim.cmd("vsplit")
+  vim.cmd("vsplit")
+  vim.cmd("wincmd =")
+end, { desc = "3-column layout" })
+
+keymap("n", "<leader>v4", function()
+  vim.cmd("only")
+  vim.cmd("vsplit")
+  vim.cmd("split")
+  vim.cmd("wincmd l")
+  vim.cmd("split")
+  vim.cmd("wincmd =")
+end, { desc = "4-window grid layout" })
 
 -- Tabs
 keymap("n", "<leader><tab>l", "<cmd>tablast<cr>", { desc = "Last Tab" })
@@ -147,5 +240,214 @@ keymap("n", "<leader>ur", function()
   vim.opt.relativenumber = not vim.opt.relativenumber:get()
 end, { desc = "Toggle Relative Numbers" })
 
+-- DDEV/Drupal commands
+keymap("n", "<leader>d", "<cmd>!ddev drush cr<cr>", { desc = "DDEV Drush Cache Rebuild" })
+
+-- Git restore commands
+keymap("n", "<leader>grf", function()
+  local file = vim.fn.expand("%")
+  if file == "" then
+    vim.notify("No file to restore", vim.log.levels.WARN)
+    return
+  end
+  local choice = vim.fn.confirm("Restore " .. file .. " to last commit?", "&Yes\n&No", 2)
+  if choice == 1 then
+    vim.cmd("!git restore " .. vim.fn.shellescape(file))
+    vim.cmd("checktime")
+    vim.notify("Restored " .. file .. " to last commit", vim.log.levels.INFO)
+  end
+end, { desc = "Restore current file to last commit" })
+
+keymap("n", "<leader>grF", function()
+  local file = vim.fn.expand("%")
+  if file == "" then
+    vim.notify("No file to restore", vim.log.levels.WARN)
+    return
+  end
+  vim.cmd("!git restore " .. vim.fn.shellescape(file))
+  vim.cmd("checktime")
+  vim.notify("Restored " .. file .. " to last commit", vim.log.levels.INFO)
+end, { desc = "Force restore current file (no confirmation)" })
+
+keymap("n", "<leader>grs", function()
+  local file = vim.fn.expand("%")
+  if file == "" then
+    vim.notify("No file to restore", vim.log.levels.WARN)
+    return
+  end
+  local choice = vim.fn.confirm("Restore " .. file .. " from staging area?", "&Yes\n&No", 2)
+  if choice == 1 then
+    vim.cmd("!git restore --staged " .. vim.fn.shellescape(file))
+    vim.notify("Restored " .. file .. " from staging area", vim.log.levels.INFO)
+  end
+end, { desc = "Restore current file from staging area" })
+
+keymap("n", "<leader>grh", function()
+  local choice = vim.fn.confirm("Hard reset current directory to HEAD? This will lose all uncommitted changes!", "&Yes\n&No", 2)
+  if choice == 1 then
+    vim.cmd("!git reset --hard HEAD")
+    vim.cmd("checktime")
+    vim.notify("Hard reset to HEAD completed", vim.log.levels.WARN)
+  end
+end, { desc = "Hard reset to HEAD (destructive)" })
+
+keymap("n", "<leader>grc", function()
+  local commit = vim.fn.input("Enter commit hash or reference (e.g., HEAD~1): ")
+  if commit == "" then
+    vim.notify("No commit specified", vim.log.levels.WARN)
+    return
+  end
+  local file = vim.fn.expand("%")
+  if file == "" then
+    vim.notify("No file to restore", vim.log.levels.WARN)
+    return
+  end
+  local choice = vim.fn.confirm("Restore " .. file .. " to " .. commit .. "?", "&Yes\n&No", 2)
+  if choice == 1 then
+    vim.cmd("!git restore --source=" .. vim.fn.shellescape(commit) .. " " .. vim.fn.shellescape(file))
+    vim.cmd("checktime")
+    vim.notify("Restored " .. file .. " to " .. commit, vim.log.levels.INFO)
+  end
+end, { desc = "Restore current file to specific commit" })
+
+-- Git ignore commands
+keymap("n", "<leader>gif", function()
+  local file = vim.fn.expand("%:.")
+  if file == "" then
+    vim.notify("No file to ignore", vim.log.levels.WARN)
+    return
+  end
+  local gitignore_path = vim.fn.findfile(".gitignore", ".;")
+  if gitignore_path == "" then
+    gitignore_path = ".gitignore"
+  end
+  
+  -- Check if file is already ignored
+  local handle = io.popen("git check-ignore " .. vim.fn.shellescape(file) .. " 2>/dev/null")
+  local result = handle:read("*a")
+  handle:close()
+  
+  if result ~= "" then
+    vim.notify(file .. " is already ignored", vim.log.levels.INFO)
+    return
+  end
+  
+  -- Add to gitignore
+  local gitignore_file = io.open(gitignore_path, "a")
+  if gitignore_file then
+    gitignore_file:write("\n" .. file .. "\n")
+    gitignore_file:close()
+    vim.notify("Added " .. file .. " to .gitignore", vim.log.levels.INFO)
+    
+    -- Refresh Neogit if it's open
+    vim.cmd("silent! NeogitResetState")
+  else
+    vim.notify("Could not open .gitignore file", vim.log.levels.ERROR)
+  end
+end, { desc = "Add current file to .gitignore" })
+
+keymap("n", "<leader>gid", function()
+  local dir = vim.fn.expand("%:h")
+  if dir == "" or dir == "." then
+    vim.notify("No directory to ignore", vim.log.levels.WARN)
+    return
+  end
+  
+  local gitignore_path = vim.fn.findfile(".gitignore", ".;")
+  if gitignore_path == "" then
+    gitignore_path = ".gitignore"
+  end
+  
+  local ignore_pattern = dir .. "/"
+  
+  -- Check if directory pattern is already ignored
+  local handle = io.popen("git check-ignore " .. vim.fn.shellescape(dir) .. " 2>/dev/null")
+  local result = handle:read("*a")
+  handle:close()
+  
+  if result ~= "" then
+    vim.notify(dir .. "/ is already ignored", vim.log.levels.INFO)
+    return
+  end
+  
+  -- Add to gitignore
+  local gitignore_file = io.open(gitignore_path, "a")
+  if gitignore_file then
+    gitignore_file:write("\n" .. ignore_pattern .. "\n")
+    gitignore_file:close()
+    vim.notify("Added " .. ignore_pattern .. " to .gitignore", vim.log.levels.INFO)
+    
+    -- Refresh Neogit if it's open
+    vim.cmd("silent! NeogitResetState")
+  else
+    vim.notify("Could not open .gitignore file", vim.log.levels.ERROR)
+  end
+end, { desc = "Add current directory to .gitignore" })
+
+keymap("n", "<leader>gip", function()
+  local pattern = vim.fn.input("Enter pattern to ignore (e.g., *.log, node_modules/, etc.): ")
+  if pattern == "" then
+    vim.notify("No pattern specified", vim.log.levels.WARN)
+    return
+  end
+  
+  local gitignore_path = vim.fn.findfile(".gitignore", ".;")
+  if gitignore_path == "" then
+    gitignore_path = ".gitignore"
+  end
+  
+  -- Add to gitignore
+  local gitignore_file = io.open(gitignore_path, "a")
+  if gitignore_file then
+    gitignore_file:write("\n" .. pattern .. "\n")
+    gitignore_file:close()
+    vim.notify("Added " .. pattern .. " to .gitignore", vim.log.levels.INFO)
+    
+    -- Refresh Neogit if it's open
+    vim.cmd("silent! NeogitResetState")
+  else
+    vim.notify("Could not open .gitignore file", vim.log.levels.ERROR)
+  end
+end, { desc = "Add custom pattern to .gitignore" })
+
+keymap("n", "<leader>gie", function()
+  local gitignore_path = vim.fn.findfile(".gitignore", ".;")
+  if gitignore_path == "" then
+    gitignore_path = ".gitignore"
+    -- Create .gitignore if it doesn't exist
+    local gitignore_file = io.open(gitignore_path, "w")
+    if gitignore_file then
+      gitignore_file:write("# .gitignore\n")
+      gitignore_file:close()
+    end
+  end
+  vim.cmd("edit " .. gitignore_path)
+end, { desc = "Edit .gitignore file" })
+
+keymap("n", "<leader>gis", function()
+  local file = vim.fn.expand("%:.")
+  if file == "" then
+    file = vim.fn.input("Enter file/pattern to check: ")
+    if file == "" then
+      vim.notify("No file specified", vim.log.levels.WARN)
+      return
+    end
+  end
+  
+  local handle = io.popen("git check-ignore -v " .. vim.fn.shellescape(file) .. " 2>/dev/null")
+  local result = handle:read("*a")
+  handle:close()
+  
+  if result ~= "" then
+    vim.notify("Ignored by: " .. result:gsub("\n", ""), vim.log.levels.INFO)
+  else
+    vim.notify(file .. " is NOT ignored", vim.log.levels.INFO)
+  end
+end, { desc = "Check if file is ignored" })
+
 -- Quit
 keymap("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit all" })
+
+-- Alternative escape mapping - kl to exit insert mode
+keymap("i", "kl", "<Esc>", { desc = "Exit insert mode" })
+keymap("i", "lk", "<Esc>", { desc = "Exit insert mode" })

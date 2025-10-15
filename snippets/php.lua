@@ -163,4 +163,35 @@ return {
       return string.lower(args[1][1])
     end, {1}),
   })),
+
+  -- PHP dump/debug snippets
+  s("dump", fmt([[
+    dump({1});
+  ]], {
+    i(1, "$variable"),
+  })),
+
+  s("dd", fmt([[
+    dd({1});
+  ]], {
+    i(1, "$variable"),
+  })),
+
+  s("var_dump", fmt([[
+    var_dump({1});
+  ]], {
+    i(1, "$variable"),
+  })),
+
+  s("print_r", fmt([[
+    print_r({1});
+  ]], {
+    i(1, "$variable"),
+  })),
+
+  s("echo", fmt([[
+    echo {1};
+  ]], {
+    i(1, '"Hello World"'),
+  })),
 }

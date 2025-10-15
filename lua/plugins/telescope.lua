@@ -28,13 +28,49 @@ return {
         "<cmd>Telescope buffers sort_mru=true sort_lastused=true<cr>",
         desc = "Switch Buffer",
       },
-      { "<leader>/", "<cmd>Telescope live_grep<cr>", desc = "Grep (root dir)" },
+      {
+        "<leader>/",
+        function()
+          local git_root = vim.fn.finddir('.git', '.;')
+          if git_root ~= '' then
+            git_root = vim.fn.fnamemodify(git_root, ':h')
+            require("telescope.builtin").live_grep({ cwd = git_root })
+          else
+            require("telescope.builtin").live_grep()
+          end
+        end,
+        desc = "Grep (git root)"
+      },
       { "<leader>:", "<cmd>Telescope command_history<cr>", desc = "Command History" },
-      { "<leader><space>", "<cmd>Telescope find_files<cr>", desc = "Find Files (root dir)" },
+      {
+        "<leader><space>",
+        function()
+          local git_root = vim.fn.finddir('.git', '.;')
+          if git_root ~= '' then
+            git_root = vim.fn.fnamemodify(git_root, ':h')
+            require("telescope.builtin").find_files({ cwd = git_root })
+          else
+            require("telescope.builtin").find_files()
+          end
+        end,
+        desc = "Find Files (git root)"
+      },
       -- find
       { "<leader>fb", "<cmd>Telescope buffers sort_mru=true sort_lastused=true<cr>", desc = "Buffers" },
       { "<leader>fc", "<cmd>Telescope find_files cwd=~/.config/nvim<cr>", desc = "Find Config File" },
-      { "<leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find Files (root dir)" },
+      {
+        "<leader>ff",
+        function()
+          local git_root = vim.fn.finddir('.git', '.;')
+          if git_root ~= '' then
+            git_root = vim.fn.fnamemodify(git_root, ':h')
+            require("telescope.builtin").find_files({ cwd = git_root })
+          else
+            require("telescope.builtin").find_files()
+          end
+        end,
+        desc = "Find Files (git root)"
+      },
       { "<leader>fF", "<cmd>Telescope find_files hidden=true no_ignore=true<cr>", desc = "Find Files (all)" },
       { "<leader>fg", "<cmd>Telescope git_files<cr>", desc = "Find Files (git-files)" },
       { "<leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "Recent" },
@@ -50,7 +86,19 @@ return {
       { "<leader>sC", "<cmd>Telescope commands<cr>", desc = "Commands" },
       { "<leader>sd", "<cmd>Telescope diagnostics bufnr=0<cr>", desc = "Document diagnostics" },
       { "<leader>sD", "<cmd>Telescope diagnostics<cr>", desc = "Workspace diagnostics" },
-      { "<leader>sg", "<cmd>Telescope live_grep<cr>", desc = "Grep (root dir)" },
+      {
+        "<leader>sg",
+        function()
+          local git_root = vim.fn.finddir('.git', '.;')
+          if git_root ~= '' then
+            git_root = vim.fn.fnamemodify(git_root, ':h')
+            require("telescope.builtin").live_grep({ cwd = git_root })
+          else
+            require("telescope.builtin").live_grep()
+          end
+        end,
+        desc = "Grep (git root)"
+      },
       { "<leader>sG", "<cmd>Telescope live_grep cwd=false<cr>", desc = "Grep (cwd)" },
       { "<leader>sh", "<cmd>Telescope help_tags<cr>", desc = "Help Pages" },
       { "<leader>sH", "<cmd>Telescope highlights<cr>", desc = "Search Highlight Groups" },
@@ -59,9 +107,34 @@ return {
       { "<leader>sm", "<cmd>Telescope marks<cr>", desc = "Jump to Mark" },
       { "<leader>so", "<cmd>Telescope vim_options<cr>", desc = "Options" },
       { "<leader>sR", "<cmd>Telescope resume<cr>", desc = "Resume" },
-      { "<leader>sw", "<cmd>Telescope grep_string word_match=-w<cr>", desc = "Word (root dir)" },
+      {
+        "<leader>sw",
+        function()
+          local git_root = vim.fn.finddir('.git', '.;')
+          if git_root ~= '' then
+            git_root = vim.fn.fnamemodify(git_root, ':h')
+            require("telescope.builtin").grep_string({ cwd = git_root, word_match = "-w" })
+          else
+            require("telescope.builtin").grep_string({ word_match = "-w" })
+          end
+        end,
+        desc = "Word (git root)"
+      },
       { "<leader>sW", "<cmd>Telescope grep_string cwd=false word_match=-w<cr>", desc = "Word (cwd)" },
-      { "<leader>sw", "<cmd>Telescope grep_string<cr>", mode = "v", desc = "Selection (root dir)" },
+      {
+        "<leader>sw",
+        function()
+          local git_root = vim.fn.finddir('.git', '.;')
+          if git_root ~= '' then
+            git_root = vim.fn.fnamemodify(git_root, ':h')
+            require("telescope.builtin").grep_string({ cwd = git_root })
+          else
+            require("telescope.builtin").grep_string()
+          end
+        end,
+        mode = "v",
+        desc = "Selection (git root)"
+      },
       { "<leader>sW", "<cmd>Telescope grep_string cwd=false<cr>", mode = "v", desc = "Selection (cwd)" },
       { "<leader>uC", "<cmd>Telescope colorscheme enable_preview=true<cr>", desc = "Colorscheme with preview" },
       {

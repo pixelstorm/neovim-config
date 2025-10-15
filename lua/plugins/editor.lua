@@ -16,10 +16,7 @@ return {
       "nvim-tree/nvim-web-devicons",
       "MunifTanjim/nui.nvim",
     },
-    keys = {
-      { "<leader>e", "<cmd>Neotree toggle<cr>", desc = "Explorer NeoTree (root dir)" },
-      { "<leader>E", "<cmd>Neotree toggle float<cr>", desc = "Explorer NeoTree (float)" },
-    },
+    cmd = "Neotree",
     deactivate = function()
       vim.cmd([[Neotree close]])
     end,
@@ -37,7 +34,7 @@ return {
       filesystem = {
         bind_to_cwd = false,
         follow_current_file = { enabled = true },
-        use_libuv_file_watcher = true,
+        use_libuv_file_watcher = false, -- Disabled to prevent EMFILE errors with large projects
       },
       window = {
         mappings = {
@@ -84,9 +81,12 @@ return {
         { "<leader>f", group = "file/find" },
         { "<leader>g", group = "git" },
         { "<leader>gh", group = "hunks" },
+        { "<leader>gi", group = "gitignore" },
+        { "<leader>gr", group = "restore" },
         { "<leader>q", group = "quit/session" },
         { "<leader>s", group = "search" },
         { "<leader>u", group = "ui" },
+        { "<leader>v", group = "windows/splits" },
         { "<leader>w", group = "write/save" },
         { "<leader>x", group = "diagnostics/quickfix" },
       },
