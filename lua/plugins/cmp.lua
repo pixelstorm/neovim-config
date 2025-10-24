@@ -29,11 +29,15 @@ return {
       local cmp = require("cmp")
       local luasnip = require("luasnip")
 
-      -- Load friendly snippets
-      require("luasnip.loaders.from_vscode").lazy_load()
+      -- Load friendly snippets safely
+      pcall(function()
+        require("luasnip.loaders.from_vscode").lazy_load()
+      end)
       
-      -- Load custom snippets
-      require("config.snippets").setup()
+      -- Load custom snippets safely
+      pcall(function()
+        require("config.snippets").setup()
+      end)
 
       -- Setup complete - duplicate configuration conflict resolved
       vim.notify("[CMP] nvim-cmp configured with proper Tab completion behavior", vim.log.levels.INFO)
@@ -234,12 +238,13 @@ return {
         }),
       })
 
-      -- Disable LSP completion for PHP files to prevent buffer number errors
+      -- Re-enable LSP completion for PHP files with proper priority
       cmp.setup.filetype("php", {
         sources = cmp.config.sources({
-          { name = "luasnip" },
-          { name = "buffer" },
-          { name = "path" },
+          { name = "nvim_lsp", priority = 1000 }, -- Re-enable LSP
+          { name = "luasnip", priority = 750 },
+          { name = "buffer", priority = 500 },
+          { name = "path", priority = 250 },
         }),
       })
 

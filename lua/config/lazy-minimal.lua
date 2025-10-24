@@ -1,8 +1,8 @@
 --[[
 ╭─────────────────────────────────────────────────────────────╮
-│                    Lazy.nvim Bootstrap                      │
+│                    Minimal Lazy Configuration              │
 │                                                             │
-│  Bootstrap and configure the lazy.nvim plugin manager      │
+│  Minimal lazy.nvim setup for debugging plugin loading      │
 ╰─────────────────────────────────────────────────────────────╯
 --]]
 
@@ -14,21 +14,32 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
--- Configure lazy.nvim
+-- Configure lazy.nvim with OPTIMIZED settings
 require("lazy").setup({
   spec = {
-    -- Import all plugin configurations from the plugins directory
-    { import = "plugins" },
+    -- Only load essential plugins for testing
+    {
+      "folke/tokyonight.nvim",
+      lazy = true,
+      priority = 1000,
+    },
+    {
+      "nvim-lualine/lualine.nvim",
+      event = "VeryLazy",
+      dependencies = { "nvim-tree/nvim-web-devicons" },
+    },
+    {
+      "nvim-telescope/telescope.nvim",
+      cmd = "Telescope",
+      dependencies = { "nvim-lua/plenary.nvim" },
+    },
   },
   defaults = {
-    lazy = true, -- ENABLE lazy loading for better performance
-    version = false, -- always use the latest git commit
+    lazy = true, -- ENABLE lazy loading by default
+    version = false,
   },
   install = { colorscheme = { "tokyonight", "habamax" } },
-  checker = {
-    enabled = false, -- disable automatic updates during startup
-    notify = false,  -- don't show update notifications
-  },
+  checker = { enabled = false }, -- DISABLE automatic updates during startup
   performance = {
     rtp = {
       -- disable some rtp plugins

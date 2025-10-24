@@ -94,7 +94,38 @@ keymap("n", "]q", vim.cmd.cnext, { desc = "Next quickfix" })
 
 -- Formatting
 keymap({ "n", "v" }, "<leader>cf", function()
-  require("conform").format({ async = true, lsp_fallback = true })
+  -- Add diagnostic logging
+  vim.notify("Leader cf triggered!", vim.log.levels.INFO)
+  
+  -- Check if conform is available
+  local conform_ok, conform = pcall(require, "conform")
+  if not conform_ok then
+    vim.notify("ERROR: conform.nvim not loaded: " .. tostring(conform), vim.log.levels.ERROR)
+    return
+  end
+  
+  -- Get current buffer info
+  local bufnr = vim.api.nvim_get_current_buf()
+  local filetype = vim.bo[bufnr].filetype
+  local filename = vim.api.nvim_buf_get_name(bufnr)
+  
+  vim.notify(string.format("Formatting buffer %d, filetype: %s, file: %s", bufnr, filetype, filename), vim.log.levels.INFO)
+  
+  -- Check available formatters for this filetype
+  local formatters = conform.list_formatters(bufnr)
+  if #formatters == 0 then
+    vim.notify("WARNING: No formatters available for filetype: " .. filetype, vim.log.levels.WARN)
+  else
+    vim.notify("Available formatters: " .. vim.inspect(formatters), vim.log.levels.INFO)
+  end
+  
+  -- Attempt formatting
+  local success, result = pcall(conform.format, { async = true, lsp_fallback = true })
+  if not success then
+    vim.notify("ERROR: Formatting failed: " .. tostring(result), vim.log.levels.ERROR)
+  else
+    vim.notify("Formatting completed successfully", vim.log.levels.INFO)
+  end
 end, { desc = "Format" })
 
 -- Diagnostic keymaps

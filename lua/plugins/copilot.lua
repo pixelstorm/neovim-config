@@ -42,6 +42,12 @@ return {
           },
         },
         filetypes = {
+          php = true, -- Enable for PHP
+          html = true, -- Enable for HTML
+          css = true,
+          scss = true,
+          javascript = true,
+          typescript = true,
           yaml = false,
           markdown = false,
           help = false,
@@ -52,7 +58,35 @@ return {
           cvs = false,
           ["."] = false,
         },
-        copilot_node_command = 'node', -- Node.js version must be > 18.x
+        copilot_node_command = (function()
+          -- Try to find Node.js v22 from nvm automatically
+          local nvm_node_path = vim.fn.expand('~/.nvm/versions/node')
+          if vim.fn.isdirectory(nvm_node_path) == 1 then
+            -- Look for any v22.x.x version
+            local versions = vim.fn.glob(nvm_node_path .. '/v22.*/bin/node', false, true)
+            if #versions > 0 then
+              -- Use the first v22 version found
+              return versions[1]
+            end
+          end
+          
+          -- Fallback: try common nvm paths
+          local fallback_paths = {
+            vim.fn.expand('~/.nvm/versions/node/v22.12.0/bin/node'),
+            vim.fn.expand('~/.nvm/versions/node/v22.11.0/bin/node'),
+            vim.fn.expand('~/.nvm/versions/node/v22.10.0/bin/node'),
+            '/usr/local/bin/node', -- Homebrew
+            'node' -- System default
+          }
+          
+          for _, path in ipairs(fallback_paths) do
+            if vim.fn.executable(path) == 1 then
+              return path
+            end
+          end
+          
+          return 'node' -- Final fallback
+        end)(),
         server_opts_overrides = {},
       })
     end,

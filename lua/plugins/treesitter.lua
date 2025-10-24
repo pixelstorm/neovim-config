@@ -176,7 +176,11 @@ return {
         local problematic_parsers = { "blade", "smarty" }
         for _, parser in ipairs(problematic_parsers) do
           pcall(function()
-            vim.treesitter.language.require_language(parser, nil, true)
+            -- Use the new API instead of deprecated require_language
+            local lang_ok, _ = pcall(vim.treesitter.language.add, parser)
+            if not lang_ok then
+              vim.notify(string.format("Could not load treesitter parser for %s", parser), vim.log.levels.DEBUG)
+            end
           end)
         end
       end)

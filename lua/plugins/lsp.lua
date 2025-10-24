@@ -122,16 +122,35 @@ return {
         end, { desc = 'Format current buffer with LSP' })
       end
 
-      -- mason-lspconfig requires that these setup functions are called in this order
-      -- before setting up the servers.
-      require('mason').setup()
-      
-      -- Setup mason-lspconfig with minimal configuration to avoid enable field error
-      local mason_lspconfig_ok, mason_lspconfig = pcall(require, 'mason-lspconfig')
-      if not mason_lspconfig_ok then
-        vim.notify("mason-lspconfig not available", vim.log.levels.WARN)
-        return
-      end
+      -- Defer Mason setup to avoid blocking startup
+      vim.defer_fn(function()
+        -- mason-lspconfig requires that these setup functions are called in this order
+        -- before setting up the servers.
+        local mason_ok, mason = pcall(require, 'mason')
+        if not mason_ok then
+          vim.notify("Mason not available", vim.log.levels.WARN)
+          return
+        end
+        mason.setup()
+        
+        -- Setup mason-lspconfig with minimal configuration to avoid enable field error
+        local mason_lspconfig_ok, mason_lspconfig = pcall(require, 'mason-lspconfig')
+        if not mason_lspconfig_ok then
+          vim.notify("mason-lspconfig not available", vim.log.levels.WARN)
+          return
+        end
+        
+        -- Try to setup mason-lspconfig safely
+        pcall(function()
+          mason_lspconfig.setup {
+            ensure_installed = vim.tbl_keys(servers),
+            automatic_installation = false,
+            automatic_setup = false,
+            -- Disable automatic_enable to prevent vim.lsp.enable() error in Neovim v0.10.0
+            automatic_enable = false,
+          }
+        end)
+      end, 100) -- Defer by 100ms
 
       -- Enable the following language servers
       --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
@@ -166,15 +185,28 @@ return {
           }
         },
 
-        -- HTML (removed twig to prevent LSP conflicts)
+        -- HTML with PHP support for embedded HTML
         html = {
-          filetypes = { "html" }
+          filetypes = { "html", "php" },
+          settings = {
+            html = {
+              format = {
+                templating = true,
+                wrapLineLength = 120,
+                wrapAttributes = "auto",
+              },
+              hover = {
+                documentation = true,
+                references = true,
+              },
+            },
+          },
         },
 
         -- JavaScript/TypeScript
         ts_ls = {}, -- Updated from deprecated tsserver
 
-        -- PHP
+        -- PHP with enhanced WordPress support
         intelephense = {
           settings = {
             intelephense = {
@@ -182,7 +214,8 @@ return {
                 maxSize = 1000000,
               },
               format = {
-                enable = false,  -- Disable PHP formatting
+                enable = false,  -- Disable LSP formatting to prevent conflicts
+                braces = "psr12",
               },
               environment = {
                 includePaths = {
@@ -190,15 +223,20 @@ return {
                   "vendor/",
                 },
               },
+              stubs = {
+                "bcmath", "bz2", "calendar", "Core", "curl", "date", "dba", "dom",
+                "enchant", "fileinfo", "filter", "ftp", "gd", "gettext", "hash",
+                "iconv", "imap", "intl", "json", "ldap", "libxml", "mbstring",
+                "mcrypt", "mysql", "mysqli", "password", "pcntl", "pcre", "PDO",
+                "pdo_mysql", "Phar", "readline", "recode", "Reflection", "regex",
+                "session", "SimpleXML", "soap", "sockets", "sodium", "SPL", "sqlite3",
+                "standard", "superglobals", "sysvsem", "sysvshm", "tokenizer", "xml",
+                "xdebug", "xmlreader", "xmlwriter", "yaml", "zip", "zlib",
+                "wordpress", "woocommerce", "acf-pro", "wordpress-globals",
+                "wp-cli", "genesis", "polylang"
+              },
             },
           },
-          -- Completely disable formatting capabilities for PHP
-          capabilities = (function()
-            local caps = vim.lsp.protocol.make_client_capabilities()
-            caps.textDocument.formatting = nil
-            caps.textDocument.rangeFormatting = nil
-            return caps
-          end)(),
         },
 
         -- Twig (using HTML LSP with Twig support)
@@ -210,6 +248,18 @@ return {
 
         -- YAML
         yamlls = {},
+
+        -- Emmet for HTML snippets in PHP
+        emmet_ls = {
+          filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact", "php" },
+          settings = {
+            emmet = {
+              includeLanguages = {
+                php = "html",
+              },
+            },
+          },
+        },
 
         -- Lua
         lua_ls = {
@@ -247,16 +297,6 @@ return {
         properties = { "documentation", "detail", "additionalTextEdits" }
       }
 
-      -- Try to setup mason-lspconfig safely
-      pcall(function()
-        mason_lspconfig.setup {
-          ensure_installed = vim.tbl_keys(servers),
-          automatic_installation = false,
-          automatic_setup = false,
-          -- Disable automatic_enable to prevent vim.lsp.enable() error in Neovim v0.10.0
-          automatic_enable = false,
-        }
-      end)
 
       -- Setup LSP servers using the new vim.lsp.config API for Neovim 0.11+
       -- with fallback to lspconfig for older versions

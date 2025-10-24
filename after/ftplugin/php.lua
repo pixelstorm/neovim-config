@@ -30,14 +30,11 @@ end, { buffer = true, desc = "PHP Shift-Tab completion" })
 local php_nav_ok, php_nav = pcall(require, 'config.php-navigation')
 if php_nav_ok then
   php_nav.setup()
-  print("PHP navigation loaded - use gf to navigate to included files")
+  -- Silently loaded - no annoying messages
 else
-  vim.notify("Failed to load PHP navigation module", vim.log.levels.WARN)
-  
   -- Fallback: basic PHP file navigation setup
   vim.opt_local.path:append("**")
   vim.opt_local.suffixesadd:prepend(".php")
   vim.opt_local.suffixesadd:prepend(".inc")
-  
-  print("PHP ftplugin loaded with basic navigation")
+  -- Silently loaded - no annoying messages
 end

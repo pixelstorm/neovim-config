@@ -8,10 +8,6 @@
 
 local opt = vim.opt
 
--- Leader key
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
-
 -- General
 opt.mouse = "a"                     -- Enable mouse support
 opt.clipboard = "unnamedplus"       -- Use system clipboard
@@ -121,3 +117,41 @@ local disabled_built_ins = {
 for _, plugin in pairs(disabled_built_ins) do
   vim.g["loaded_" .. plugin] = 1
 end
+
+-- Enhanced PHP file detection
+vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+  pattern = {"*.php", "*.phtml", "*.inc"},
+  callback = function()
+    vim.bo.filetype = "php"
+  end,
+})
+
+-- WordPress specific file detection
+vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+  pattern = {
+    "wp-config*.php",
+    "functions.php",
+    "*.theme.php",
+    "**/themes/**/*.php",
+    "**/plugins/**/*.php",
+    "**/wp-content/**/*.php",
+  },
+  callback = function()
+    vim.bo.filetype = "php"
+    -- Set WordPress-specific settings
+    vim.bo.expandtab = true
+    vim.bo.tabstop = 4
+    vim.bo.shiftwidth = 4
+    vim.bo.softtabstop = 4
+  end,
+})
+
+-- Enhanced HTML detection for template files
+vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+  pattern = {"*.html.php", "*.template.php"},
+  callback = function()
+    vim.bo.filetype = "php"
+    -- Enable HTML syntax highlighting within PHP
+    vim.cmd("runtime! syntax/html.vim")
+  end,
+})

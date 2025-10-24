@@ -20,6 +20,13 @@
 ╰─────────────────────────────────────────────────────────────╯
 --]]
 
+-- Set leader keys BEFORE loading lazy.nvim
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
+
+-- Enable startup debugging (comment out after diagnosis)
+-- require("config.debug-startup").setup()
+
 -- Bootstrap lazy.nvim plugin manager
 require("config.lazy")
 
